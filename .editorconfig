@@ -1,0 +1,7 @@
+[*.cs]
+# Reglas de estilo para C#
+indent_style = space
+indent_size = 4
+max_line_length = 120
+csharp_new_line_before_members = true
+csharp_indent_case_contents = true

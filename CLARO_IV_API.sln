@@ -1,0 +1,24 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CLARO_IV_API", "CLARO_IV_API.csproj", "{13E989B7-F80E-EAC1-0691-067782860D8E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{13E989B7-F80E-EAC1-0691-067782860D8E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{13E989B7-F80E-EAC1-0691-067782860D8E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{13E989B7-F80E-EAC1-0691-067782860D8E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{13E989B7-F80E-EAC1-0691-067782860D8E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {37AED305-9A44-4107-BEF2-22741F94C27E}
+	EndGlobalSection
+EndGlobal
