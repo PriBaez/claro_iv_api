@@ -4,11 +4,10 @@ namespace CLARO_IV_API.Interfaces.Products
 {
     public interface IProductService
     {
-        IEnumerable<Product> GetAll();
-        Product GetById(int id);
-        bool Insert(Product product);
-        bool Update(Product product);
-        bool Delete(Product product);
-        bool Remove(Product product);
+        Task<IEnumerable<ProductView>> GetAllAsync();
+        Task<Product> GetByIdAsync(int id);
+        Task<bool> InsertAsync(Product product);
+        Task<bool> UpdateAsync(Product product);
+        Task<bool> DeleteAsync(int id);
     }
 }

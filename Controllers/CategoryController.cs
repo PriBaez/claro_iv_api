@@ -1,4 +1,4 @@
-using CLARO_IV_API.Interfaces.Categories;
+using CLARO_IV_API.Interfaces;
 using CLARO_IV_API.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,10 +8,10 @@ namespace CLARO_IV_API.Controllers
     [ApiController]
     public class CategoryController : ControllerBase
     {
-        private readonly ICategoryService _service;
+        private readonly IGenericService<Category> _service;
         private readonly ILogger<CategoryController> _logger;
 
-        public CategoryController(ICategoryService service, ILogger<CategoryController> logger)
+        public CategoryController(IGenericService<Category> service, ILogger<CategoryController> logger)
         {
             _service = service;
             _logger = logger;
@@ -19,12 +19,12 @@ namespace CLARO_IV_API.Controllers
 
         // GET: api/Category
         [HttpGet]
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAll()
         {
             _logger.LogInformation($"Recibida solicitud GET a {Request.Path}");
             try
             {
-                var category = _service.GetAll();
+                var category = await _service.GetAllAsync();
                 if (category == null || !category.Any())
                 {
                     _logger.LogWarning("No se encontraron categorias");
@@ -41,7 +41,7 @@ namespace CLARO_IV_API.Controllers
 
         // GET: api/Category/5
         [HttpGet("{id}")]
-        public IActionResult GetById(int id)
+        public async Task<IActionResult> GetById(int id)
         {
             _logger.LogInformation($"Recibida solicitud GET a {Request.Path}");
            try
@@ -52,7 +52,7 @@ namespace CLARO_IV_API.Controllers
                 return BadRequest("Ocurrió un error durante la petición: ID nulo o igual a cero");
             }
             
-            var category = _service.GetById(id);
+            var category = await _service.GetByIdAsync(id);
 
             if (category == null)
             {
@@ -70,7 +70,7 @@ namespace CLARO_IV_API.Controllers
 
         // POST: api/Category
         [HttpPost]
-        public IActionResult Post(Category category)
+        public async Task<IActionResult> Post(Category category)
         {
             _logger.LogInformation($"Recibida solicitud POST a {Request.Path}");
             if (category == null)
@@ -80,7 +80,12 @@ namespace CLARO_IV_API.Controllers
             }
             try
             {
-                _service.Insert(category);
+                bool insertProcess = await _service.InsertAsync(category);
+                if(!insertProcess)
+                {
+                    _logger.LogError($"Error creación la categoria: el servicio devolvió {insertProcess}");
+                    return BadRequest($"Ocurrio un error durante el proceso de creación de la categoria");
+                }
                 _logger.LogInformation("Categoria creada correctamente");
                 return StatusCode(201, "Categoria creada exitosamente");
             }
@@ -93,7 +98,7 @@ namespace CLARO_IV_API.Controllers
 
         // PUT: api/Category/5
         [HttpPut("{id}")]
-        public IActionResult Put(int id, Category category)
+        public async Task<IActionResult> Put(int id, Category category)
         {
             _logger.LogInformation($"Recibida solicitud PUT a {Request.Path}");
             if (id != category.Id || category == null)
@@ -103,7 +108,12 @@ namespace CLARO_IV_API.Controllers
             }
             try
             {
-                _service.Update(category);
+                bool updateProcess = await _service.UpdateAsync(category);
+                if(!updateProcess)
+                {
+                    _logger.LogError($"Error actualizando la categoria: el servicio devolvió {updateProcess}");
+                    return BadRequest($"Ocurrió un error durante el proceso de actualización de la categoria");
+                }
                 _logger.LogInformation($"Categoria actualizada correctamente");
                 return NoContent();
             }
@@ -116,19 +126,25 @@ namespace CLARO_IV_API.Controllers
 
         // DELETE: api/Category/5
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
             try
             {
                 _logger.LogInformation($"Recibida solicitud DELETE a {Request.Path}");
-                var category = _service.GetById(id);
+                var category = await _service.GetByIdAsync(id);
                 if (category == null)
                 {
                     _logger.LogWarning($"La categoria #{id} es nula");
                     return NotFound($"La categoria #{id} es nula");
                 }
+                
+                if(category.Id != id)
+                {
+                    _logger.LogWarning($"La categoria tiene una disparidad de datos");
+                    return NotFound($"La categoria tiene una disparidad de datos");
+                }
 
-                bool deleteProcess = _service.Delete(category);
+                bool deleteProcess = await _service.DeleteAsync(id);
                 if(!deleteProcess)
                 {
                     _logger.LogError($"Error eliminando la categoria: el servicio devolvió {deleteProcess}");
@@ -139,34 +155,6 @@ namespace CLARO_IV_API.Controllers
             } catch(Exception ex)
             {
                 _logger.LogError($"Ha ocurrido un error en la eliminación de la categoria: {ex.Message}");
-                return BadRequest($"Ha ocurrido un error en la eliminación de la categoria: {ex.Message}");
-            }
-        }
-
-        [HttpDelete("Remove/{id}")]
-        //Soft Delete
-        public IActionResult Remove(int id)
-        {
-            try
-            {
-                _logger.LogInformation($"Recibida solicitud DELETE a {Request.Path}");
-                var category = _service.GetById(id);
-                if (category == null)
-                {
-                    _logger.LogWarning($"La categoria #{id} no fue encontrado");
-                    return NotFound($"La categoria #{id} no fue encontrado");
-                }
-                bool deleteProcess = _service.Remove(category);
-                if(!deleteProcess)
-                {
-                    _logger.LogError($"Ha ocurrido un error desactivación de la categoria");
-                    return BadRequest($"Ha ocurrido un error en la eliminación de la categoria");
-                }
-                _logger.LogInformation($"Categoria desactivada correctamente");
-                return NoContent();
-            } catch(Exception ex)
-            {
-                _logger.LogError($"Ha ocurrido en la desactivación de la categoria: {ex.Message}");
                 return BadRequest($"Ha ocurrido un error en la eliminación de la categoria: {ex.Message}");
             }
         }

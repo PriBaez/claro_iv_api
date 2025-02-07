@@ -28,7 +28,6 @@ public partial class ProductIvContext : DbContext
             entity.ToTable("categories");
 
             entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.IsDeleted).HasColumnName("is_deleted");
             entity.Property(e => e.Name)
                 .HasMaxLength(100)
                 .IsUnicode(false)
@@ -41,11 +40,15 @@ public partial class ProductIvContext : DbContext
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.CategoryId).HasColumnName("category_id");
-            entity.Property(e => e.IsDeleted).HasColumnName("is_deleted");
             entity.Property(e => e.Name)
                 .HasMaxLength(100)
                 .IsUnicode(false)
                 .HasColumnName("name");
+
+            entity.HasOne(d => d.Category).WithMany(p => p.Products)
+                .HasForeignKey(d => d.CategoryId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("fk_products_categories");
         });
 
         modelBuilder.Entity<ProductVariant>(entity =>
@@ -62,6 +65,11 @@ public partial class ProductIvContext : DbContext
                 .HasColumnName("price");
             entity.Property(e => e.ProductId).HasColumnName("product_id");
             entity.Property(e => e.Stock).HasColumnName("stock");
+
+            entity.HasOne(d => d.Product).WithMany(p => p.ProductVariants)
+                .HasForeignKey(d => d.ProductId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("fk_products_variants");
         });
 
         OnModelCreatingPartial(modelBuilder);

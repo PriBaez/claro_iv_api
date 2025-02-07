@@ -14,4 +14,6 @@ public partial class ProductVariant
     public int Stock { get; set; }
 
     public decimal Price { get; set; }
+
+    public virtual Product? Product { get; set; } = null!;
 }

@@ -1,5 +1,5 @@
 using System.Text.Json.Serialization;
-using CLARO_IV_API.Interfaces.Categories;
+using CLARO_IV_API.Interfaces;
 using CLARO_IV_API.Interfaces.Products;
 using CLARO_IV_API.Models;
 using CLARO_IV_API.Repositories;
@@ -19,10 +19,10 @@ builder.Services.AddDbContext<ProductIvContext>(options =>
 options.UseSqlServer(builder.Configuration.GetConnectionString("dbconnection")));
 
 //Services
-builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<ProductRepository>();
 builder.Services.AddScoped<IProductService, ProductService>();
-builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
-builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+builder.Services.AddScoped(typeof(IGenericService<>), typeof(GenericService<>));
 //CORS
 builder.Services.AddCors(p => p.AddPolicy("corsapp", builder =>
 {

@@ -1,3 +1,4 @@
+using CLARO_IV_API.Interfaces;
 using CLARO_IV_API.Interfaces.Products;
 using CLARO_IV_API.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -19,18 +20,18 @@ namespace CLARO_IV_API.Controllers
 
         // GET: api/Product
         [HttpGet]
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAll()
         {
             _logger.LogInformation($"Recibida solicitud GET a {Request.Path}");
             try
             {
-                var product = _service.GetAll();
+                var product = await _service.GetAllAsync();
                 if (product == null || !product.Any())
                 {
                     _logger.LogWarning("No se encontraron productos");
                     return NotFound("No se encontraron productos");
                 }
-                _logger.LogInformation("Retornando productos encontradas");
+                _logger.LogInformation("Retornando productos encontrados");
                 return Ok(product);
             } catch (Exception ex)
             {
@@ -41,7 +42,7 @@ namespace CLARO_IV_API.Controllers
 
         // GET: api/Product/5
         [HttpGet("{id}")]
-        public IActionResult GetById(int id)
+        public async Task<IActionResult> GetById(int id)
         {
             _logger.LogInformation($"Recibida solicitud GET a {Request.Path}");
            try
@@ -52,7 +53,7 @@ namespace CLARO_IV_API.Controllers
                 return BadRequest("Ocurrió un error durante la petición: ID nulo o igual a cero");
             }
             
-            var product = _service.GetById(id);
+            var product = await _service.GetByIdAsync(id);
 
             if (product == null)
             {
@@ -70,7 +71,7 @@ namespace CLARO_IV_API.Controllers
 
         // POST: api/Product
         [HttpPost]
-        public IActionResult Post(Product product)
+        public async Task<IActionResult> Post(Product product)
         {
             _logger.LogInformation($"Recibida solicitud POST a {Request.Path}");
             if (product == null)
@@ -80,9 +81,14 @@ namespace CLARO_IV_API.Controllers
             }
             try
             {
-                _service.Insert(product);
-                _logger.LogInformation("producto creado correctamente");
-                return StatusCode(201, "producto creado exitosamente");
+                bool insertProcess = await _service.InsertAsync(product);
+                if(!insertProcess)
+                {
+                    _logger.LogError($"Error creando el producto: el servicio devolvió {insertProcess}");
+                    return BadRequest($"Ocurrió un error durante el proceso de creación del producto");
+                }
+                _logger.LogInformation("Producto creado correctamente");
+                return StatusCode(201, "Producto creado exitosamente");
             }
             catch (Exception ex)
             {
@@ -93,7 +99,7 @@ namespace CLARO_IV_API.Controllers
 
         // PUT: api/Product/5
         [HttpPut("{id}")]
-        public IActionResult Put(int id, Product product)
+        public async Task<IActionResult> Put(int id, Product product)
         {
             _logger.LogInformation($"Recibida solicitud PUT a {Request.Path}");
             if (id != product.Id || product == null)
@@ -103,8 +109,13 @@ namespace CLARO_IV_API.Controllers
             }
             try
             {
-                _service.Update(product);
-                _logger.LogInformation($"producto actualizada correctamente");
+                bool updateProcess = await _service.UpdateAsync(product);
+                if(!updateProcess)
+                {
+                    _logger.LogError($"Error actualizando el producto: el servicio devolvió {updateProcess}");
+                    return BadRequest($"Ocurrió un error durante el proceso de actualización del producto");
+                }
+                _logger.LogInformation($"producto actualizado correctamente");
                 return NoContent();
             }
             catch (Exception ex) 
@@ -116,23 +127,29 @@ namespace CLARO_IV_API.Controllers
 
         // DELETE: api/Product/5
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
             try
             {
                 _logger.LogInformation($"Recibida solicitud DELETE a {Request.Path}");
-                var product = _service.GetById(id);
+                var product = _service.GetByIdAsync(id);
                 if (product == null)
                 {
                     _logger.LogWarning($"el producto #{id} no fue encontrado");
                     return NotFound($"el producto #{id} no fue encontrado");
                 }
 
-                bool deleteProcess = _service.Delete(product);
+                if(product.Id != id)
+                {
+                    _logger.LogWarning($"El producto tiene una disparidad de datos");
+                    return NotFound($"El producto tiene una disparidad de datos");
+                }
+
+                bool deleteProcess = await _service.DeleteAsync(id);
                 if(!deleteProcess)
                 {
                     _logger.LogError($"Error eliminando el producto: el servicio devolvió {deleteProcess}");
-                    return BadRequest($"Ocurrio un error durante el proceso de eliminación de el producto");
+                    return BadRequest($"Ocurrio un error durante el proceso de eliminación del producto");
                 }
                 _logger.LogInformation($"producto eliminado correctamente");
                 return NoContent();
@@ -140,34 +157,6 @@ namespace CLARO_IV_API.Controllers
             {
                 _logger.LogError($"Ha ocurrido un error en la eliminación del producto: {ex.Message}");
                 return BadRequest($"Ha ocurrido un error en la eliminación del producto: {ex.Message}");
-            }
-        }
-
-        [HttpDelete("Remove/{id}")]
-        //Soft Delete
-        public IActionResult Remove(int id)
-        {
-            try
-            {
-                _logger.LogInformation($"Recibida solicitud DELETE a {Request.Path}");
-                var product = _service.GetById(id);
-                if (product == null)
-                {
-                    _logger.LogWarning($"el producto #{id} no fue encontrado");
-                    return NotFound($"el producto #{id} no fue encontrado");
-                }
-                bool deleteProcess = _service.Remove(product);
-                if(!deleteProcess)
-                {
-                    _logger.LogError($"Ha ocurrido un error desactivación de el producto");
-                    return BadRequest($"Ha ocurrido un error en la eliminación de el producto");
-                }
-                _logger.LogInformation($"producto desactivadao correctamente");
-                return NoContent();
-            } catch(Exception ex)
-            {
-                _logger.LogError($"Ha ocurrido en la desactivación de el producto: {ex.Message}");
-                return BadRequest($"Ha ocurrido un error en la eliminación de el producto: {ex.Message}");
             }
         }
     }
