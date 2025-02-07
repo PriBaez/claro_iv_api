@@ -2,9 +2,9 @@
 
 ## 🚀 Introducción
 
-Este documento proporciona una descripción general de la arquitectura de la API, incluida su capa de servicio, capa de repositorio y modelos de datos. Su objetivo es ayudar a los desarrolladores a comprender la estructura y la funcionalidad de la API.
+Este documento proporciona una descripción general de la arquitectura de la API, incluida su capa de servicio, capa de repositorio y modelos de datos. Su objetivo es ayudar a los desarrolladores o usuarios curiosos a comprender la estructura y la funcionalidad de la API para poder usuarla con su SPA en el siguiente repositorio (https://github.com/PriBaez/claro_iv_app).
 
-Base URL:
+#### Base URL:
 
 ```
 http://localhost:5290/api
